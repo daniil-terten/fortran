@@ -1,0 +1,366 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{spbudiploma_tempora}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{cmap}
+\usepackage{geometry}
+
+\usepackage{euscript}
+\usepackage{longtable}
+\usepackage{makecell}
+\usepackage{listings}
+\usepackage[pdftex]{graphicx}
+\usepackage{amsthm,amssymb, amsmath}
+\usepackage{textcomp}
+\usepackage{spbudiploma_tempora}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{cmap}
+\usepackage{geometry}
+
+\begin{document}
+\begin{titlepage}
+\title{3.1 Титульный лист}
+
+\begin{center}
+	Санкт-Петербургский политехнический университет Петра Великого\\
+	Институт компьютерных наук и технологий\\
+	\bfseries{Высшая школа программной инженерии}
+\end{center}
+
+\vspace{20ex} 
+
+\begin{center}
+	\begin{huge} {\MakeUppercase{\bfseries{\scshape курсовая работа}}} \end{huge}
+	
+	\vspace{3ex}
+	
+	{\bfseries Лабораторная работа 1}
+	
+	по дисциплине: «Алгоритмы и структура данных»
+\end{center}
+
+\vspace{30ex}
+
+\noindent Выполнил\\
+студент гр.в3530904/10022\hfill \begin{minipage}{0.6\textwidth} \hfill Полещук Е.О.\end{minipage}
+
+\vspace{3ex}
+
+\noindent Руководитель\\
+старший преподаватель.\hfill \begin{minipage} {0.6\textwidth}\hfill Фёдоров С.А.\end{minipage}
+
+\vspace{3ex}
+
+\hfill \begin{minipage}{0.6\textwidth} \hfill «\underline{\hspace{0.1cm 23}}»\underline{\hspace{0.1cm мая}} 202\underline{\hspace{0.1cm 2}} г.\end{minipage}
+
+\vfill
+
+\begin{center}
+	Санкт-Петербург\\ 
+	2022
+\end{center}
+\end{titlepage}
+\setcounter{page}{2}
+
+\tableofcontents
+\pagebreak
+
+\begin{center}\specialsection{Введние}\end{center}
+\textbf{Постановка задачи:}\\
+Дан список группы в виде:
+\begin{verbatim}
+     ФАМИЛИЯ     ИМЯ     ОТЧЕСТВО
+     15 симв.  10 симв.  15 симв.
+\end{verbatim}
+\begin{verbatim}
+    Безруков Сергей Викторович
+    Лебедев Пётр Станиславович
+    Глухих Сергей Алексеевич
+\end{verbatim}
+Удалить из списка всех, у которых имена совпадают, кроме первого. Пример выходного файла:
+\begin{verbatim}
+     Безруков Сергей Викторович
+     Лебедев Пётр Станиславович
+\end{verbatim}
+\textbf{Цель работы:}\\
+Выбор структуры данных для решения поставленной задачи на современных микроархитектурах. 
+Задачи:
+\begin{enumerate}
+	\item реализовать задание с использованием массивов строк;
+	\item реализовать задание с использованием массивов символов и внутренних процедур головной программы;
+	\item реализовать задание с использованием структуры массивов, файлов записей и модулей;
+	\item реализовать задание с использованием стркутуры массивов, файлов записей, модулей и хвостовой рекурсии;
+	\item реализовать задание с использованием модулей, хвостовой рекурсии, однонаправленных списков неизвестной длины;
+	\item провести анализ на регулярный доступ к памяти;
+	\item провести анализ на векторизацию кода;
+	\item провести сравнительный анализ реализаций.
+\end{enumerate}
+
+Во всех вышеизложенных заданиях необходимо также использовать регулярное программирование.\\
+\textbf{Указание:}\\
+Работать с исходным массивом. При каждом нахождении повторяющегося имени будет неэффективным тут же его удалять и сдвигать все остальные элементы в массиве, потому что имя опять может встретиться.
+
+Будет неэффективным нахождение сперва всех мест в массиве, где находится текущее имя, а потом удаление его оттуда сдвигом остальных элементов, потому что среди остальных имён могут оказаться другие повторяющиеся, которые всё равно в итоге придётся удалять.
+
+Необходимо сперва сформировать массив-маску для всех уникальных имен. При этом не стоит проверять имя, если оно уже встречалось. Затем по маске упаковать исходные массивы (Pack).
+\newpage
+
+\begin{center}\specialsection{Основная часть}\end{center}
+\section{Реализация и анализ применения различных структур данных}
+
+\subsection{Массив строк}
+Ниже продемонстрировано объявление массивов строк, кол-во элементов в данных массивах равно количеству пользователей, длина каждой строки равна длинне слова:
+\begin{lstlisting}[language=Fortran]
+integer, parameter              :: USER_AMOUNT = 14, 
+	LN_LEN = 15, FN_LEN = 10, MN_LEN = 15
+
+character(:), allocatable     :: input_file, output_file, format
+integer                       :: In, Out, IO, i
+
+character(LN_LEN, kind=CH_)   :: Last_Names(USER_AMOUNT) = ""
+character(FN_LEN, kind=CH_)   :: First_Names(USER_AMOUNT) = ""
+character(MN_LEN, kind=CH_)   :: Middle_Names(USER_AMOUNT) = ""
+\end{lstlisting}
+
+Для обработанных данных были объявлены аналогичные массивы выделяемой размерности, так как до окончания обработки неизвестно кол-во строк в результирующих массивах:
+\begin{lstlisting}[language=Fortran]
+character(LN_LEN, kind=CH_), allocatable :: Last_Names_Res(:)
+character(FN_LEN, kind=CH_), allocatable :: First_Names_Res(:)
+character(MN_LEN, kind=CH_), allocatable :: Middle_Names_Res(:)
+\end{lstlisting}
+
+Обработка массива, создания маски подходящих элементов, которых нужно упаковать в результирующие массивы, упаковка результирующих массивов:
+\begin{lstlisting}[language=Fortran]
+do concurrent (i=USER_AMOUNT:2:-1)
+Users_Mask(i) = .not.(Any(First_Names(:i-1) == First_Names(i)))
+end do
+
+First_Names_Res = Pack(First_Names, Users_Mask)
+Last_Names_Res = Pack(Last_Names, Users_Mask)
+Middle_Names_Res = Pack(Middle_Names, Users_Mask)
+\end{lstlisting}
+
+При использовании процедуры Pack реализуется нерегулярный доступ к памяти, используется по причине необходимости работать с исходным массивом согласно условиям задачи. При выборке всех имен пользователей от первого и до необходимо - регулярный, так как данные сплошные.
+
+\subsection{Массив символов}
+Ниже продемонтрировано объявление двумерных массивов, количество символов в первом индексе для достижения регулярного доступа к памяти во время сравнения символов при поиске повторений массива имен пользователей:
+\begin{lstlisting}[language=Fortran]
+integer, parameter        :: USER_AMOUNT = 14, LN_LEN = 15, 
+	FN_LEN = 10, MN_LEN = 15
+
+character(:), allocatable :: input_file, output_file
+integer                   :: In, Out
+
+character(kind=CH_)    :: Last_Names(LN_LEN, USER_AMOUNT) = ""
+character(kind=CH_)    :: First_Names(FN_LEN, USER_AMOUNT) = ""
+character(kind=CH_)    :: Middle_Names(MN_LEN, USER_AMOUNT) = ""
+\end{lstlisting}
+
+Для обработанных данных были объявлены аналогичные массивы выделяемой размерности, так как до окончания обработки неизвестно кол-во строк в результирующих массивах:
+\begin{lstlisting}[language=Fortran]
+character(kind=CH_), allocatable      :: Last_Names_Res(:, :)
+character(kind=CH_), allocatable      :: First_Names_Res(:, :)
+character(kind=CH_), allocatable      :: Middle_Names_Res(:, :)
+\end{lstlisting}
+
+Подпрограмма удаления элементов по условию, цикл нужен для формирования массива индексов подходящих элементов, по которым затем они переносятся в результирующие массивы:
+\begin{lstlisting}[language=Fortran]
+subroutine Handle_User_List(Last_Names, First_Names, Middle_Names, 
+	Last_Names_Res, First_Names_Res, Middle_Names_Res)
+character(kind=CH_)                 :: Last_Names(:, :), 
+	First_Names(:, :), 
+Middle_Names(:, :)
+character(kind=CH_), allocatable    :: Last_Names_Res(:, :), 
+	First_Names_Res(:, :), Middle_Names_Res(:, :)
+logical                             :: Users_Mask(USER_AMOUNT)
+integer                             :: result_len, i, j
+integer, parameter                  :: INDEXES(*) = [(i, i=1, 
+	USER_AMOUNT)]
+integer, allocatable                :: Unique_Pos(:)
+
+intent (in)       Last_Names, First_Names, Middle_Names
+intent (out)      Last_Names_Res, First_Names_Res, Middle_Names_Res
+
+do concurrent (i=User_Amount:2:-1)
+Users_Mask(i) = .not.(Any([(All(First_Names(:, j) == 
+	First_Names(:, i)), j=1, i-1)]))
+end do
+
+result_len = Count(Users_Mask)
+Unique_Pos = Pack(INDEXES, Users_Mask)
+allocate (Last_Names_Res(LN_LEN, result_len), 
+	First_Names_Res(FN_LEN, result_len), 
+	Middle_Names_Res(MN_LEN, result_len))
+
+do concurrent (i=1:result_len)
+	First_Names_Res(:, i) = First_Names(:, Unique_Pos(i))
+	Last_Names_Res(:, i) = Last_Names(:, Unique_Pos(i))
+	Middle_Names_Res(:, i) = Middle_Names(:, Unique_Pos(i))
+end do
+\end{lstlisting}
+
+Данные хранятся в массиве по строкам, следовательно регулярный доступ будет осуществлен при работе с ними. Как и с массивом строк, реализовать векторизацию при заполнении невозможно.
+
+\subsection{Структура массивов}
+Объявление структуры массивов:
+\begin{lstlisting}[language=Fortran]
+integer, parameter :: USER_AMOUNT   = 14
+integer, parameter :: LN_LEN        = 15
+integer, parameter :: FN_LEN        = 10
+integer, parameter :: MN_LEN        = 15
+
+type Users
+   character(LN_LEN, kind=CH_), allocatable   :: Last_Names(:)
+   character(FN_LEN, kind=CH_), allocatable   :: First_Names(:)
+   character(MN_LEN, kind=CH_), allocatable   :: Middle_Names(:)
+end type Users
+\end{lstlisting}
+
+Была выбрана структура массивов, так как искать нужно исходя из задания только по одному полю, выгодно значения данного поля расположить сплошными данными в одном массиве для регулярного доступа к памяти. Реализовано формирование двоичного файла записей из входного файла:
+\begin{lstlisting}[language=Fortran]
+subroutine Create_Data_File(Input_File, Data_File)
+	character(*), intent(in)   :: Input_File, data_file
+	
+	integer                    :: In, Out, IO, i
+	character(:), allocatable  :: format
+	
+	character(LN_LEN, kind=CH_) :: Last_Names(USER_AMOUNT)
+	character(FN_LEN, kind=CH_) :: First_Names(USER_AMOUNT)
+	character(MN_LEN, kind=CH_) :: Middle_Names(USER_AMOUNT)
+	
+	open (file=Input_File, encoding=E_, newunit=In)
+		format = '(3(a, 1x))'
+		read (In, format, iostat=IO) (Last_Names(i), 
+			First_Names(i), Middle_Names(i), i=1, 
+			USER_AMOUNT)
+		call Handle_IO_status(IO, 
+			"init arrays with formatted file")
+	close (In)
+	
+	open (file=Data_File, form="unformatted", 
+		newunit=Out, access="stream")
+		write (Out, iostat=IO) Last_Names, First_Names, 
+			Middle_Names
+		call Handle_IO_status(IO, 
+			"creating unformatted file by index")
+	close (Out)
+end subroutine Create_Data_File
+\end{lstlisting}
+
+И функция чтения данных из двоичного файла в структуры массивов:
+\begin{lstlisting}[language=Fortran]
+function Read_Users_List(Data_File) result(Usrs)
+	type(Users)                :: Usrs
+	character(*), intent(in)   :: Data_File
+	integer                    :: In, IO
+	
+	allocate (Usrs%Last_Names(USER_AMOUNT), 
+		Usrs%First_Names(USER_AMOUNT), 
+		Usrs%Middle_Names(USER_AMOUNT))
+	open (file=Data_File, form="unformatted", 
+		newunit=In, access="stream")
+		read (In, iostat=IO) Usrs%Last_Names, 
+			Usrs%First_Names, Usrs%Middle_Names
+		call Handle_IO_status(IO, "init objects")
+	close (In)
+end function Read_Users_List
+\end{lstlisting}
+
+Реализовано нахождение нужных элементов с помощью рекурсивный процедуры и их упаковывание:
+\begin{lstlisting}[language=Fortran]
+pure function Handle_Users_List(Usrs) result(Usrs_Res)
+type(Users)              :: Usrs
+type(Users)              :: Usrs_Res
+logical                  :: Users_Mask(USER_AMOUNT)
+integer                  :: i
+
+intent (in)              Usrs
+
+do concurrent (i=USER_AMOUNT:2:-1)
+	Users_Mask(i) = .not.(Any(Usrs%First_Names(:i-1) == 
+		Usrs%First_Names(i)))
+end do
+
+Usrs_Res%First_Names = Pack(Usrs%First_Names, Users_Mask)
+Usrs_Res%Last_Names = Pack(Usrs%Last_Names, Users_Mask)
+Usrs_Res%Middle_Names = Pack(Usrs%Middle_Names, Users_Mask)
+end function Handle_Users_List
+\end{lstlisting}
+
+\subsection{Динамический список}
+
+Объявляем структуру узла списка:
+\begin{lstlisting}[language=Fortran]
+integer, parameter :: LN_LEN   = 15
+integer, parameter :: FN_LEN   = 10
+integer, parameter :: MN_LEN   = 15
+
+type User
+	character(LN_LEN, kind=CH_)    :: Last_Name    = ""
+	character(FN_LEN, kind=CH_)    :: First_Name   = ""
+	character(MN_LEN, kind=CH_)    :: Middle_Name  = ""
+	type(User), pointer            :: next         => Null()
+end type User
+\end{lstlisting}
+
+Реализуем обход списка и удаление неподходящих узлов с помощью рекурсивных процедур:
+\begin{lstlisting}[language=Fortran]
+recursive subroutine Handle_Users_List(Users)
+	type(User), pointer              :: Users
+	
+	if (Associated(Users)) then
+	call Delete_Dublicates(Users, Users%next)
+	call Handle_Users_List(Users%next)
+	end if
+end subroutine Handle_Users_List
+
+recursive subroutine Delete_Dublicates(current, current_next)
+	type(User), pointer            :: current_next, current, tmp
+	
+	if (Associated(current_next)) then
+		if (current_next%First_Name == 
+			current%First_Name) then
+			tmp => current_next
+			current_next => current_next%next
+			deallocate(tmp)
+			call Delete_Dublicates(current, current%next)
+	else
+		call Delete_Dublicates(current, current_next%next)
+		end if
+	end if
+end subroutine Delete_Dublicates
+\end{lstlisting}
+
+При использовании динамического списка неизвестной длины применять о векторизацию и регулярный доступ к памяти невозможно, каждый элемент списка находится в случайном месте в памяти.
+\newpage
+\section{Сравнение реализаций}
+
+В таблице 1 приведен сравнительный анализ различных реализаций лабораторной работы:
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|p{18ex}|p{11ex}|p{12ex}|p{13ex}|p{18ex}|}
+		\hline
+		\centering{-}&\bfseries{Массив строк}&\bfseries{Массив символов}&\bfseries{Структура массивов}&\bfseries{Динамический список}   \\
+		\hline
+		\bfseries{Cплошные данные} & Да & Да & Да & Нет \\
+		\hline
+		\bfseries{Регулярный доступ} & При обработке & При обработке & При обработке & Нет \\
+		\hline
+		\bfseries{Векторизация} & Нет & Нет & Нет & Нет \\
+		\hline
+		\bfseries{Потенциальная векторизация} & При обработке & При обработке & При обработке & Нет \\
+		\hline
+	\end{tabular}
+	\caption{Сравнение реализаций}
+\end{table}
+
+Исходя из анализа для выполнения подходят все варианты, кроме динамических списков, как самых медленных для обработки, и неэффективных, если мы заранее знаем размер списка. Среди остальных вариантов наиболее предпочтительна структура массивов, позволяющие сгруппировать данные в одну строкуктуру, повышая уровень абстракции. Также реализация массива строк более предпочтительна перед массивом символов, так как второе решение повышает сложность кода и требует большой компетенции от разработчика при написании и поддержке кода под современных архитектуры.
+
+\newpage
+\begin{center}\specialsection{Вывод}\end{center}
+
+Поставленная задача была реализована несколькими способами, среди которых бели выбраны алгоритмы, наиболее подходищие для выполнения программного кода на современных архитектурах. Наиболее подходящим решением оказалась реализация структуры массивов. Поставленная цель выполнена.
+\end{document}
